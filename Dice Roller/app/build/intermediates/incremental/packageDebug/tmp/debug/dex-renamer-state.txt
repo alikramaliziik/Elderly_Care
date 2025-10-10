@@ -1,0 +1,16 @@
+#Wed Oct 01 08:41:19 EAT 2025
+base.0=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+base.1=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
+base.2=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/debug/mergeProjectDexDebug/11/classes.dex
+base.3=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/debug/mergeProjectDexDebug/15/classes.dex
+base.4=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/debug/mergeExtDexDebug/classes2.dex
+path.0=classes.dex
+path.1=0/classes.dex
+path.2=11/classes.dex
+path.3=15/classes.dex
+path.4=classes2.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex
+renamed.4=classes5.dex

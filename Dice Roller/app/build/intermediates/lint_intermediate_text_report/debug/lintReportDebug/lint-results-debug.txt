@@ -1,0 +1,118 @@
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_1.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_2.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_3.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_4.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_5.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable/dice_6.xml:19: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:height="250dp"
+                    ~~~~~
+
+   Explanation for issues of type "VectorRaster":
+   Vector icons require API 21 or API 24 depending on used features, but when
+   minSdkVersion is less than 21 or 24 and Android Gradle plugin 1.4 or higher
+   is used, a vector drawable placed in the drawable folder is automatically
+   moved to drawable-anydpi-v21 or drawable-anydpi-v24 and bitmap images are
+   generated for different screen resolutions for backwards compatibility.
+
+   However, there are some limitations to this raster image generation, and
+   this lint check flags elements and attributes that are not fully supported.
+   You should manually check whether the generated output is acceptable for
+   those older devices.
+
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build.gradle.kts:66: Warning: A newer version of androidx.compose:compose-bom than 2024.12.01 is available: 2025.09.01 [GradleDependency]
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build.gradle.kts:67: Warning: A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.11.0 [GradleDependency]
+    implementation("androidx.activity:activity-compose:1.9.3")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build.gradle.kts:72: Warning: A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.17.0 [GradleDependency]
+    implementation("androidx.core:core-ktx:1.15.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build.gradle.kts:73: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.9.4 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/drawable-v24: Warning: This folder configuration (v24) is unnecessary; minSdkVersion is 24. Merge all the resources in this folder into drawable. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/java/com/example/diceroller/MainActivity.kt:57: Information: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var result by remember { mutableStateOf( 1) }
+                             ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AutoboxingStateCreation":
+   Calling mutableStateOf<T>() when T is either backed by a primitive type on
+   the JVM or is a value class results in a state implementation that requires
+   all state values to be boxed. This usually causes an additional allocation
+   for each state write, and adds some additional work to auto-unbox values
+   when reading the value of the state. Instead, prefer to use a specialized
+   primitive state implementation for Int, Long, Float, and Double when the
+   state does not need to track null values and does not override the default
+   SnapshotMutationPolicy. See mutableIntStateOf(), mutableLongStateOf(),
+   mutableFloatStateOf(), and mutableDoubleStateOf() for more information.
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.runtime
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:3: Warning: The resource R.color.purple_200 appears to be unused [UnusedResources]
+    <color name="purple_200">#FFBB86FC</color>
+           ~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:4: Warning: The resource R.color.purple_500 appears to be unused [UnusedResources]
+    <color name="purple_500">#FF6200EE</color>
+           ~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:5: Warning: The resource R.color.purple_700 appears to be unused [UnusedResources]
+    <color name="purple_700">#FF3700B3</color>
+           ~~~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:6: Warning: The resource R.color.teal_200 appears to be unused [UnusedResources]
+    <color name="teal_200">#FF03DAC5</color>
+           ~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:7: Warning: The resource R.color.teal_700 appears to be unused [UnusedResources]
+    <color name="teal_700">#FF018786</color>
+           ~~~~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:8: Warning: The resource R.color.black appears to be unused [UnusedResources]
+    <color name="black">#FF000000</color>
+           ~~~~~~~~~~~~
+/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/src/main/res/values/colors.xml:9: Warning: The resource R.color.white appears to be unused [UnusedResources]
+    <color name="white">#FFFFFFFF</color>
+           ~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+0 errors, 18 warnings

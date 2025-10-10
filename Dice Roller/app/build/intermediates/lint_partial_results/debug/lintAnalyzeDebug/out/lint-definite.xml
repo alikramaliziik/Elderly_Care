@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.8.0" type="incidents">
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_1.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_2.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_3.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_4.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_5.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/dice_6.xml"
+            line="19"
+            column="21"
+            startOffset="747"
+            endLine="19"
+            endColumn="26"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.compose:compose-bom than 2024.12.01 is available: 2025.09.01">
+        <fix-replace
+            description="Change to 2025.09.01"
+            family="Update versions"
+            oldString="2024.12.01"
+            replacement="2025.09.01"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="66"
+            column="20"
+            startOffset="1751"
+            endLine="66"
+            endColumn="71"
+            endOffset="1802"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.11.0">
+        <fix-replace
+            description="Change to 1.11.0"
+            family="Update versions"
+            oldString="1.9.3"
+            replacement="1.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="67"
+            column="20"
+            startOffset="1823"
+            endLine="67"
+            endColumn="62"
+            endOffset="1865"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.17.0">
+        <fix-replace
+            description="Change to 1.17.0"
+            family="Update versions"
+            oldString="1.15.0"
+            replacement="1.17.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="72"
+            column="20"
+            startOffset="2105"
+            endLine="72"
+            endColumn="51"
+            endOffset="2136"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.9.4">
+        <fix-replace
+            description="Change to 2.9.4"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.9.4"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="73"
+            column="20"
+            startOffset="2157"
+            endLine="73"
+            endColumn="68"
+            endOffset="2205"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="This folder configuration (`v24`) is unnecessary; `minSdkVersion` is 24. Merge all the resources in this folder into `drawable`.">
+        <fix-data file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable-v24" folderName="drawable" requiresApi="24"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable-v24"/>
+    </incident>
+
+    <incident
+        id="AutoboxingStateCreation"
+        severity="informational"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`">
+        <fix-replace
+            description="Replace with mutableIntStateOf"
+            replacement="androidx.compose.runtime.mutableIntStateOf"
+            shortenNames="true"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/example/diceroller/MainActivity.kt"
+                startOffset="1882"
+                endOffset="1896"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/example/diceroller/MainActivity.kt"
+            line="57"
+            column="30"
+            startOffset="1882"
+            endLine="57"
+            endColumn="44"
+            endOffset="1896"/>
+    </incident>
+
+</incidents>

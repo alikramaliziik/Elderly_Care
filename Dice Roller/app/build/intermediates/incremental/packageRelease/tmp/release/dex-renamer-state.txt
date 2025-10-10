@@ -1,0 +1,7 @@
+#Wed Oct 01 08:50:02 EAT 2025
+base.0=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/release/mergeDexRelease/classes.dex
+base.1=/home/poppie/Documents/25_kot/2.3/CP3406-Mobile-Computing/Dice Roller/app/build/intermediates/dex/release/mergeDexRelease/classes2.dex
+path.0=classes.dex
+path.1=classes2.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
