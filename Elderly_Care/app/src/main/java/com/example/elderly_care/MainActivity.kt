@@ -1,4 +1,4 @@
-package com.example.elderly_care
+package old.people.elderly_care
 
 import android.os.Bundle
 import android.widget.Toast
@@ -9,7 +9,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.elderly_care.ui.theme.Elderly_CareTheme
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import old.people.elderly_care.data.AppDatabase
+import old.people.elderly_care.data.Caregiver
+import old.people.elderly_care.ui.LoginScreen
+import old.people.elderly_care.ui.SignUpScreen
+import old.people.elderly_care.ui.add.AddActivityScreen
+import old.people.elderly_care.ui.profile.ProfileScreen
+import old.people.elderly_care.ui.theme.Elderly_CareTheme
+import old.people.elderly_care.ui.auth.AuthViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,52 +33,105 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var isLoggedIn by remember { mutableStateOf(false) }
-                    var showProfile by remember { mutableStateOf(false) }
-
-                    when {
-                        !isLoggedIn -> {
-                            LoginScreen(
-                                onLoginClick = { email, password ->
-                                    if (email.isNotEmpty() && password.isNotEmpty()) {
-                                        isLoggedIn = true
-                                        showProfile = false
-                                        Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                onSignUpClick = {
-                                    Toast.makeText(this, "Sign Up coming soon", Toast.LENGTH_SHORT).show()
-                                },
-                                onForgotPasswordClick = {
-                                    Toast.makeText(this, "Password reset coming soon", Toast.LENGTH_SHORT).show()
-                                }
-                            )
-                        }
-                        showProfile -> {
-                            ProfileScreen(
-                                onBackClick = {
-                                    showProfile = false
-                                }
-                            )
-                        }
-                        else -> {
-                            DashboardScreen(
-                                onLogout = {
-                                    isLoggedIn = false
-                                    showProfile = false
-                                    Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show()
-                                },
-                                onProfileClick = {
-                                    showProfile = true
-                                }
-                            )
-                        }
-                    }
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    val context = LocalContext.current
+    
+    val authViewModel = androidx.lifecycle.viewmodel.compose.viewModel<AuthViewModel>(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(
+                    AppDatabase.getInstance(context).dao(),
+                    context.applicationContext as android.app.Application
+                ) as T
+            }
+        }
+    )
+
+    var loggedInCaregiver by remember { mutableStateOf<Caregiver?>(null) }
+
+    val error by authViewModel.error.collectAsState()
+    
+    LaunchedEffect(error) {
+        error?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            authViewModel.clearError()
+        }
+    }
+
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginSuccess = { caregiver ->
+                    loggedInCaregiver = caregiver
+                    navController.navigate("dashboard") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onSignUpClick = {
+                    navController.navigate("signup")
+                },
+                onForgotPasswordClick = {
+                    Toast.makeText(context, "Password reset coming soon", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+        
+        composable("signup") {
+            SignUpScreen(
+                viewModel = authViewModel,
+                onSignUpSuccess = {
+                    Toast.makeText(context, "Account created! Please login", Toast.LENGTH_SHORT).show()
+                    navController.navigate("login") {
+                        popUpTo("signup") { inclusive = true }
+                    }
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onLoginClick = {
+                    navController.navigate("login") {
+                        popUpTo("signup") { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable("dashboard") {
+            DashboardScreen(
+                navController = navController,
+                onLogout = {
+                    loggedInCaregiver = null
+                    navController.navigate("login") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable("profile") {
+            loggedInCaregiver?.let { caregiver ->
+                ProfileScreen(
+                    caregiver = caregiver,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+        }
+        
+        composable("add_activity") {
+            AddActivityScreen(navController = navController)
+        }
+    }
+}
