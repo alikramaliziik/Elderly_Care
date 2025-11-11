@@ -1,4 +1,4 @@
-package com.example.elderly_care
+package old.people.elderly_care
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,76 +16,85 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-
-enum class ActivityType {
-    MEDICATION, DOCTOR_VISIT, EXERCISE, MEAL, SOCIAL, THERAPY, OTHER
-}
-
-data class DailyActivity(
-    val id: String,
-    val title: String,
-    val time: String,
-    val description: String,
-    val type: ActivityType,
-    val isCompleted: Boolean = false,
-    val priority: Priority = Priority.NORMAL
-)
-
-enum class Priority {
-    HIGH, NORMAL, LOW
-}
+import androidx.navigation.NavController
+import old.people.elderly_care.data.AppDatabase
+import old.people.elderly_care.data.UserPreferences
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    onLogout: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
-    viewModel: DashboardViewModel = viewModel()
+    navController: NavController,
+    onLogout: () -> Unit = {}
 ) {
-    // Collect UI state from ViewModel using lifecycle-aware collection
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // ViewModel with Room + DataStore
+    val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<DashboardViewModel>(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return DashboardViewModel(
+                    dao = AppDatabase.getInstance(context).dao(),
+                    prefs = UserPreferences(context)
+                ) as T
+            }
+        }
+    )
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    
+
+    // Group activities by time period
+    val morningActivities = uiState.activities.filter { time ->
+        val hour = time.time.split(":")[0].toIntOrNull() ?: 0
+        hour < 12
+    }
+    val afternoonActivities = uiState.activities.filter { time ->
+        val hour = time.time.split(":")[0].toIntOrNull() ?: 0
+        hour in 12..16
+    }
+    val eveningActivities = uiState.activities.filter { time ->
+        val hour = time.time.split(":")[0].toIntOrNull() ?: 0
+        hour > 16
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column(
                         modifier = Modifier.semantics {
-                            contentDescription = "Dashboard header showing today's schedule for ${uiState.currentDate}"
+                            contentDescription = "Dashboard header - ${uiState.currentDate}"
                         }
                     ) {
                         Text(
-                            "Today's Schedule",
+                            "Daily Schedule",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             uiState.currentDate,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 },
                 actions = {
                     IconButton(
-                        onClick = onProfileClick,
+                        onClick = { navController.navigate("profile") },
                         modifier = Modifier.semantics {
                             contentDescription = "Profile button"
-                            role = Role.Button
                         }
                     ) {
                         Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.size(28.dp))
                     }
-                    
                     IconButton(
                         onClick = onLogout,
                         modifier = Modifier.semantics {
                             contentDescription = "Logout button"
-                            role = Role.Button
                         }
                     ) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout", modifier = Modifier.size(28.dp))
@@ -100,28 +109,10 @@ fun DashboardScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add new activity - could open dialog */ },
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.semantics {
-                    contentDescription = "Add new activity button"
-                    role = Role.Button
-                }
+                onClick = { navController.navigate("add_activity") },
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Activity", modifier = Modifier.size(28.dp))
-            }
-        },
-        snackbarHost = {
-            // Show error message if exists
-            if (uiState.hasError) {
-                Snackbar(
-                    action = {
-                        TextButton(onClick = { viewModel.clearError() }) {
-                            Text("Dismiss")
-                        }
-                    }
-                ) {
-                    Text(uiState.errorMessage ?: "An error occurred")
-                }
             }
         }
     ) { padding ->
@@ -132,38 +123,72 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(MaterialTheme.colorScheme.background),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Summary Section
-                SummarySection(uiState)
+                // Summary
+                item {
+                    SummarySection(uiState)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Morning Section
+                if (morningActivities.isNotEmpty()) {
+                    item {
+                        TimeSection(
+                            title = "Morning",
+                            startTime = "06:00 AM",
+                            endTime = "12:00 PM",
+                            icon = Icons.Default.Brightness7,
+                            color = Color(0xFFFF9800)
+                        )
+                    }
+                    items(morningActivities.sortedBy { it.time }) { activity ->
+                        TimeBasedActivityCard(
+                            activity = activity,
+                            onToggleComplete = { viewModel.toggleActivityCompletion(activity.id) }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                }
 
-                // Section Header
-                Text(
-                    "Daily Activities",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .semantics { heading() }
-                )
+                // Afternoon Section
+                if (afternoonActivities.isNotEmpty()) {
+                    item {
+                        TimeSection(
+                            title = "Afternoon",
+                            startTime = "12:00 PM",
+                            endTime = "06:00 PM",
+                            icon = Icons.Default.WbSunny,
+                            color = Color(0xFFFF5722)
+                        )
+                    }
+                    items(afternoonActivities.sortedBy { it.time }) { activity ->
+                        TimeBasedActivityCard(
+                            activity = activity,
+                            onToggleComplete = { viewModel.toggleActivityCompletion(activity.id) }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                }
 
-                // Activities List
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .semantics {
-                            contentDescription = "List of ${uiState.totalCount} daily activities"
-                        },
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.activities, key = { it.id }) { activity ->
-                        ActivityCard(
+                // Evening Section
+                if (eveningActivities.isNotEmpty()) {
+                    item {
+                        TimeSection(
+                            title = "Evening",
+                            startTime = "06:00 PM",
+                            endTime = "10:00 PM",
+                            icon = Icons.Default.Brightness4,
+                            color = Color(0xFF673AB7)
+                        )
+                    }
+                    items(eveningActivities.sortedBy { it.time }) { activity ->
+                        TimeBasedActivityCard(
                             activity = activity,
                             onToggleComplete = { viewModel.toggleActivityCompletion(activity.id) }
                         )
@@ -174,15 +199,69 @@ fun DashboardScreen(
     }
 }
 
+// ————————————————————————————————————————
+// ALL YOUR ORIGINAL UI COMPONENTS BELOW
+// ————————————————————————————————————————
+
+@Composable
+fun TimeSection(
+    title: String,
+    startTime: String,
+    endTime: String,
+    icon: ImageVector,
+    color: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
+        ),
+        border = androidx.compose.foundation.BorderStroke(2.dp, color),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(color, RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = color
+                )
+                Text(
+                    "$startTime - $endTime",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun SummarySection(uiState: DashboardUiState) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .semantics(mergeDescendants = true) {
-                contentDescription = "Summary: ${uiState.completedCount} of ${uiState.totalCount} activities completed, ${uiState.pendingMedicationCount} medications pending"
-            },
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         SummaryCard(
@@ -190,15 +269,13 @@ fun SummarySection(uiState: DashboardUiState) {
             value = "${uiState.completedCount}/${uiState.totalCount}",
             icon = Icons.Default.CheckCircle,
             color = Color(0xFF4CAF50),
-            contentDesc = "Completed activities: ${uiState.completedCount} out of ${uiState.totalCount}",
             modifier = Modifier.weight(1f)
         )
         SummaryCard(
-            title = "Medications",
-            value = "${uiState.pendingMedicationCount}",
-            icon = Icons.Default.LocalPharmacy,
-            color = Color(0xFF2196F3),
-            contentDesc = "Pending medications: ${uiState.pendingMedicationCount}",
+            title = "Urgent",
+            value = "${uiState.activities.count { it.priority == Priority.HIGH }}",
+            icon = Icons.Default.Warning,
+            color = Color(0xFFFF5252),
             modifier = Modifier.weight(1f)
         )
     }
@@ -210,132 +287,151 @@ fun SummaryCard(
     value: String,
     icon: ImageVector,
     color: Color,
-    contentDesc: String,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.semantics { contentDescription = contentDesc },
-        colors = CardDefaults.cardColors(containerColor = color),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.15f)),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, color),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column {
-                Text(
-                    title,
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    value,
-                    color = Color.White,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.8f),
-                modifier = Modifier.size(48.dp)
+                tint = color,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = color,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                title,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
 @Composable
-fun ActivityCard(
+fun TimeBasedActivityCard(
     activity: DailyActivity,
     onToggleComplete: () -> Unit
 ) {
     val (backgroundColor, iconColor, icon) = getActivityStyle(activity.type)
-    
-    val activityDesc = buildString {
-        append("${activity.title} at ${activity.time}. ")
-        append(activity.description)
-        if (activity.priority == Priority.HIGH) append(". High priority")
-        append(if (activity.isCompleted) ". Completed" else ". Not completed")
-    }
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .semantics { contentDescription = activityDesc },
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (activity.isCompleted) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (activity.priority == Priority.HIGH) {
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .height(60.dp)
-                        .background(Color.Red, RoundedCornerShape(2.dp))
-                        .semantics { contentDescription = "High priority indicator" }
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-            }
+            // Time Display
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(backgroundColor, RoundedCornerShape(12.dp)),
+                    .width(80.dp)
+                    .background(backgroundColor, RoundedCornerShape(8.dp))
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    activity.time,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = iconColor,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Icon
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(backgroundColor, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = "${activity.type.name} icon",
                     tint = iconColor,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
+
+            // Content
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    activity.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (activity.isCompleted)
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    else MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    activity.time,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = iconColor
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        activity.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (activity.isCompleted)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // Priority Stars
+                    if (activity.priority == Priority.HIGH) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "High priority",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "High priority",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    } else if (activity.priority == Priority.NORMAL) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Normal priority",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
                 Text(
                     activity.description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(top = 4.dp)
+                    maxLines = 1
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+
+            // Checkbox
             Checkbox(
                 checked = activity.isCompleted,
                 onCheckedChange = { onToggleComplete() },
-                modifier = Modifier
-                    .size(48.dp)
-                    .semantics {
-                        contentDescription = if (activity.isCompleted)
-                            "Mark ${activity.title} as incomplete"
-                        else "Mark ${activity.title} as complete"
-                        role = Role.Checkbox
-                    },
+                modifier = Modifier.size(44.dp),
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color(0xFF4CAF50),
                     uncheckedColor = MaterialTheme.colorScheme.outline
@@ -357,4 +453,3 @@ fun getActivityStyle(type: ActivityType): Triple<Color, Color, ImageVector> {
         ActivityType.OTHER -> Triple(Color(0xFFF5F5F5), Color(0xFF757575), Icons.Default.EventNote)
     }
 }
-
