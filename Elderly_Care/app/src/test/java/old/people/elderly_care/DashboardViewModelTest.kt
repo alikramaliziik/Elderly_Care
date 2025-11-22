@@ -65,8 +65,8 @@ class DashboardViewModelTest {
                 description = "Blood pressure pills",
                 date = LocalDate.now().toString(),
                 time = "08:00",
-                type = ActivityType.MEDICATION.name,   // FIXED
-                priority = Priority.NORMAL.name,       // FIXED
+                type = ActivityType.MEDICATION.name,   
+                priority = Priority.NORMAL.name,       
                 isCompleted = false
             )
         )
