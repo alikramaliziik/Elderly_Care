@@ -26,7 +26,7 @@ class AppDaoInstrumentedTest {
 
         dao = db.dao()
 
-        // FIX: Populate manually—callback does NOT work in tests
+        
         AppDatabase.populateForTest(dao)
     }
 
